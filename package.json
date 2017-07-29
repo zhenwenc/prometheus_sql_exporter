@@ -1,0 +1,19 @@
+{
+  "name": "prometheus_sql_exporter",
+  "version": "1.0.0",
+  "description": "Prometheus SQL Exporter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhenwenc/prometheus_sql_exporter.git"
+  },
+  "author": "Zhenwen Cai (frederick.cai@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zhenwenc/prometheus_sql_exporter/issues"
+  },
+  "homepage": "https://github.com/zhenwenc/prometheus_sql_exporter#readme"
+}
