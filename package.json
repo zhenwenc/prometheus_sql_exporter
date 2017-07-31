@@ -15,5 +15,20 @@
   "bugs": {
     "url": "https://github.com/zhenwenc/prometheus_sql_exporter/issues"
   },
-  "homepage": "https://github.com/zhenwenc/prometheus_sql_exporter#readme"
+  "homepage": "https://github.com/zhenwenc/prometheus_sql_exporter#readme",
+  "dependencies": {
+    "commander": "^2.11.0",
+    "js-yaml": "^3.9.0",
+    "mysql": "^2.14.0",
+    "prom-client": "^10.0.2",
+    "rxjs": "^5.4.2",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/commander": "^2.9.1",
+    "@types/js-yaml": "^3.9.0",
+    "@types/mysql": "0.0.34",
+    "@types/node": "^8.0.17",
+    "@types/winston": "^2.3.4"
+  }
 }

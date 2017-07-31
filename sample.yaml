@@ -1,0 +1,26 @@
+---
+db:
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  databases:
+    - 'schema_a'
+    - 'schema_b'
+
+queries:
+
+  # Execute query on one database
+  - name: sample_alpha
+    intervalSecs: 30
+    dbPattern: 'schema_a'
+    statement: >-
+      SELECT count(1) AS count FROM foo;
+    valueColumns: [count]
+
+  # Execute query on multiple databases
+  - name: sample_beta
+    intervalSecs: 25
+    dbPattern: 'schema_[a|b]'
+    statement: >-
+      SELECT min(a) AS min_a, max(a) AS max_a FROM foo;
+    valueColumns: [min_a, max_a]
