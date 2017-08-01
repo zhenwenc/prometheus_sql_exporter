@@ -1,6 +1,6 @@
 import * as prom from 'prom-client';
 import { Gauge } from 'prom-client';
-import { Observable, Subscription, TestScheduler } from 'rxjs';
+import { Observable, Subscription, Subject } from 'rxjs';
 
 import { Config, QueryConfig } from './Config';
 import { DbClient, ColumnValue } from './DbClient';
@@ -14,19 +14,26 @@ interface Query extends QueryConfig {
 }
 
 export class Exporter {
-  private readonly register: any;
-  private readonly gauges = new Map<string, Gauge>();
+  private register: prom.Registry;
+  private gauges = new Map<string, Gauge>();
+  private stopper = new Subject<{}>();
 
   constructor(private config: Config, private dbClient: DbClient) {
     this.register = new prom.Registry();
     prom.collectDefaultMetrics({ registry: this.register });
   }
 
-  public start() {
-    this.runSchedulers().subscribe(
-      next => {},
-      error => logger.error('Failed to run scheduler:', error)
-    );
+  public start(): void {
+    this.runSchedulers()
+      .takeUntil(this.stopper)
+      .subscribe(
+        next => {},
+        error => logger.error('Failed to run scheduler:', error)
+      );
+  }
+
+  public stop(): void {
+    this.stopper.next({});
   }
 
   public getMetrics() {
@@ -72,8 +79,8 @@ export class Exporter {
         name: metric,
         help: metric,
         labelNames: ['db'],
+        registers: [this.register],
       });
-      this.register.registerMetric(gauge);
       this.gauges.set(metric, gauge);
     }
 

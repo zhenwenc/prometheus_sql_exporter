@@ -63,7 +63,7 @@ export class MySqlClient implements DbClient {
     return valueColumns.map(column => {
       const value = parseFloat(`${results[column]}`);
       if (isNaN(value) && isFinite(value)) {
-        throw new Error(`Expected numeric metric value, but [${value}]`);
+        throw new Error(`Unexpected value [${value}] for column [${column}]`);
       } else {
         return { column, value };
       }
