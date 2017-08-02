@@ -29,8 +29,8 @@ Please consider using these exporters if they meet your requirements.
 ## Docker
 
 ```sh
-docker run -it --rm --name prometheus_sql_exporter \
+docker run --rm --name prometheus_sql_exporter \
            -v <path to config file>:/app/conf/exporter.yaml \
-           -p 8080:8080 \
+           -p 9990:8080 \
            zhenwenc/prometheus_sql_exporter
 ```
