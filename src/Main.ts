@@ -12,19 +12,13 @@ const logger = getLogger('Main');
 program
   .version('1.0.0')
   .option(
-    '-f, --config <config>',
-    'Path to exporter configuration file.',
+    '--config <config>',
+    'Path to exporter configuration file. Default: conf/exporter.yaml',
     /^.+\.(yaml|yml)$/i
   )
   .parse(process.argv);
 
-if (typeof program.config === 'undefined') {
-  logger.error('Exporter config file is required.');
-  program.help();
-  process.exit(1);
-}
-
-const config = loadConfig(program.config);
+const config = loadConfig(program.config || 'conf/exporter.yaml');
 const dbClient = new MySqlClient(config.db);
 const exporter = new Exporter(config, dbClient);
 

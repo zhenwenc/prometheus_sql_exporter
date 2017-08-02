@@ -84,6 +84,7 @@ const verifyQueryConfigs = (configs: QueryConfig[]) => {
 };
 
 export const loadConfig = (filePath: string): Config => {
+  logger.info('Loading config from:', filePath);
   const config = yaml.safeLoad(fs.readFileSync(filePath, 'utf8')) as Config;
   logger.info('Loaded exporter config:', config);
 

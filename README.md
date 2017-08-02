@@ -26,3 +26,11 @@ Please consider using these exporters if they meet your requirements.
 - MySQL: [prometheus-sql](https://github.com/chop-dbhi/prometheus-sql) for single-tenant database.
 - MySQL: [prometheus-mysql-exporter](https://github.com/braedon/prometheus-mysql-exporter) for multi-tenant database with consistent structure.
 
+## Docker
+
+```sh
+docker run -it --rm --name prometheus_sql_exporter \
+           -v <path to config file>:/app/conf/exporter.yaml \
+           -p 8080:8080 \
+           zhenwenc/prometheus_sql_exporter
+```
