@@ -7,9 +7,10 @@ WORKDIR /app
 COPY tsconfig.json /app/
 COPY package-lock.json /app/
 COPY package.json /app/
-COPY src /app/src/
 
 RUN npm install
+
+COPY src /app/src/
 
 EXPOSE 8080
 
