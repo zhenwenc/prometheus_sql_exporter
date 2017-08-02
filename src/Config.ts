@@ -36,6 +36,8 @@ export interface Config {
 }
 
 const verifyDbConfig = (config: DbConfig) => {
+  let pass = config.pass;
+
   if (typeof config === 'undefined') {
     throw new Error('Database config is required.');
   }
@@ -48,12 +50,15 @@ const verifyDbConfig = (config: DbConfig) => {
   if (typeof config.user === 'undefined') {
     throw new Error('Database user is requried.');
   }
-  if (typeof config.pass === 'undefined') {
-    logger.warn('No database password provided.');
+  if (typeof pass === 'undefined' || pass.length === 0) {
+    logger.warn('No database pass provided.');
+    pass = undefined;
   }
   if (typeof config.databases === 'undefined' || config.databases.length < 1) {
     throw new Error('Targeted databases is required.');
   }
+
+  return { ...config, pass };
 };
 
 const verifyQueryConfigs = (configs: QueryConfig[]) => {
@@ -91,7 +96,6 @@ export const loadConfig = (filePath: string): Config => {
   if (typeof config === 'undefined') {
     throw new Error(`Exporter config file [${filePath}] is empty.`);
   }
-  verifyDbConfig(config.db);
 
-  return config;
+  return { ...config, db: verifyDbConfig(config.db) };
 };
