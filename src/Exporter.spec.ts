@@ -77,7 +77,7 @@ describe('scheduler', () => {
     f.schedule(exporter, done)(() => {
       const expected = 'mx_test_testschema_diff_name{db="testschema"} 10';
       expect(exporter.getMetrics()).to.have.string(expected);
-    }, 1100);
+    }, 300);
   });
 
   it('should update metrics base on the configured interval', done => {
@@ -94,18 +94,18 @@ describe('scheduler', () => {
 
     f.schedule(exporter)(() => {
       expect(exporter.getMetrics()).to.have.length(0);
-    }, 900);
+    }, 150);
 
     f.schedule(exporter)(() => {
       const expected = 'mx_test_testschema_count{db="testschema"} 10';
       expect(exporter.getMetrics()).to.have.string(expected);
-    }, 1100);
+    }, 300);
 
     f.schedule(exporter, done)(() => {
       const expected = 'mx_test_testschema_count{db="testschema"} 99';
       expect(exporter.getMetrics()).to.have.string(expected);
       expect(dbClientStub.callCount).to.eq(2);
-    }, 2100);
+    }, 1100);
   });
 
   it('should execute SQL query on all databases if no dbPattern', done => {
@@ -127,7 +127,7 @@ describe('scheduler', () => {
       const expected2 = 'mx_test_schema_b_count{db="schema_b"} 99';
       expect(exporter.getMetrics()).to.have.string(expected1);
       expect(exporter.getMetrics()).to.have.string(expected2);
-    }, 1100);
+    }, 300);
   });
 
   it('should execute SQL query on subset of databases if dbPattern specified', done => {
@@ -154,7 +154,7 @@ describe('scheduler', () => {
       const expected2 = 'mx_test_schema_c_count{db="schema_c"} 55';
       expect(exporter.getMetrics()).to.have.string(expected1);
       expect(exporter.getMetrics()).to.have.string(expected2);
-    }, 1100);
+    }, 300);
   });
 
   it('should export metrics for multiple configured columns', done => {
@@ -173,7 +173,7 @@ describe('scheduler', () => {
       const expected2 = 'mx_test_testschema_max{db="testschema"} 66';
       expect(exporter.getMetrics()).to.have.string(expected1);
       expect(exporter.getMetrics()).to.have.string(expected2);
-    }, 1100);
+    }, 300);
   });
 
   it('should stop fetching data after stop', done => {
@@ -192,12 +192,66 @@ describe('scheduler', () => {
       const expected = 'mx_test_testschema_count{db="testschema"} 10';
       expect(exporter.getMetrics()).to.have.string(expected);
       exporter.stop();
-    }, 1100);
+    }, 300);
 
     f.schedule(exporter, done)(() => {
       expect(spyDbClient.callCount).to.eq(1);
       const expected = 'mx_test_testschema_count{db="testschema"} 10';
       expect(exporter.getMetrics()).to.have.string(expected);
-    }, 3100);
+    }, 2100);
+  });
+
+  it('should not panic when failed to execute query', done => {
+    const f = new Fixture();
+    const spyDbClient = stub(f.dbClient, 'execute')
+      .onFirstCall()
+      .returns(Observable.throw(new Error('Test Error')))
+      .onSecondCall()
+      .returns(f.mkColumnValue('count', 10));
+
+    const config = { db: f.dbConfig, queries: [f.query] };
+    const exporter = new Exporter(config, f.dbClient);
+    exporter.start();
+
+    f.schedule(exporter)(() => {
+      expect(exporter.getMetrics()).to.have.string('');
+    }, 300);
+
+    f.schedule(exporter, done)(() => {
+      expect(spyDbClient.callCount).to.eq(2);
+      const expected = 'mx_test_testschema_count{db="testschema"} 10';
+      expect(exporter.getMetrics()).to.have.string(expected);
+    }, 1100);
+  });
+
+  it('should not retry when failed to execute query but wait for next interval', done => {
+    const f = new Fixture();
+    const spyDbClient = stub(f.dbClient, 'execute')
+      .onFirstCall()
+      .returns(f.mkColumnValue('count', 10))
+      .onSecondCall()
+      .returns(Observable.throw(new Error('Test Error')))
+      .onThirdCall()
+      .returns(f.mkColumnValue('count', 99));
+
+    const config = { db: f.dbConfig, queries: [f.query] };
+    const exporter = new Exporter(config, f.dbClient);
+    exporter.start();
+
+    f.schedule(exporter)(() => {
+      const expected = 'mx_test_testschema_count{db="testschema"} 10';
+      expect(exporter.getMetrics()).to.have.string(expected);
+    }, 300);
+
+    f.schedule(exporter)(() => {
+      const expected = 'mx_test_testschema_count{db="testschema"} 10';
+      expect(exporter.getMetrics()).to.have.string(expected);
+    }, 1100);
+
+    f.schedule(exporter, done)(() => {
+      expect(spyDbClient.callCount).to.eq(3);
+      const expected = 'mx_test_testschema_count{db="testschema"} 99';
+      expect(exporter.getMetrics()).to.have.string(expected);
+    }, 2100);
   });
 });
